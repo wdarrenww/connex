@@ -115,7 +115,8 @@ services:
       - PORT=8080
       - DATABASE_URL=postgres://connex:connex_password@postgres:5432/connex?sslmode=disable
       - REDIS_URL=redis://redis:6379/0
-      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+      # JWT_SECRET must be set via environment variable in production. No default.
+      - JWT_SECRET
       - OTEL_ENABLED=true
       - OTEL_JAEGER_URL=http://jaeger:14268/api/traces
       - OTEL_SERVICE_NAME=connex

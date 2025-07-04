@@ -80,7 +80,7 @@ func Load() (*Config, error) {
 	// Load .env file if it exists
 	if err := godotenv.Load(); err != nil {
 		// It's okay if .env doesn't exist in production
-		fmt.Printf("Warning: .env file not found: %v\n", err)
+		// fmt.Printf("Warning: .env file not found: %v\n", err)
 	}
 
 	config := &Config{
@@ -101,7 +101,7 @@ func Load() (*Config, error) {
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		JWT: JWTConfig{
-			Secret:     getEnv("JWT_SECRET", "your-secret-key"),
+			Secret:     getEnvStrict("JWT_SECRET"),
 			Expiration: getDurationEnv("JWT_EXPIRATION", 24*time.Hour),
 		},
 		Log: LogConfig{
@@ -141,8 +141,8 @@ func (c *Config) validate() error {
 		return fmt.Errorf("PORT is required")
 	}
 
-	if c.JWT.Secret == "your-secret-key" {
-		return fmt.Errorf("JWT_SECRET must be set to a secure value")
+	if c.JWT.Secret == "" {
+		return fmt.Errorf("JWT_SECRET must be set")
 	}
 
 	return nil
@@ -174,4 +174,13 @@ func getIntEnv(key string, defaultValue int) int {
 		}
 	}
 	return defaultValue
+}
+
+// getEnvStrict gets an environment variable or panics if not set
+func getEnvStrict(key string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		panic("Required environment variable missing: " + key)
+	}
+	return value
 }

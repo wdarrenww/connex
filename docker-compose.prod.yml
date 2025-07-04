@@ -1,4 +1,4 @@
-version: '3.8'
+wversion: '3.8'
 
 services:
   # PostgreSQL Database (Production)
@@ -60,7 +60,8 @@ services:
       - PORT=8080
       - DATABASE_URL=postgres://${POSTGRES_USER:-connex}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-connex}?sslmode=require
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-      - JWT_SECRET=${JWT_SECRET}
+      # JWT_SECRET must be set via environment variable in production. No default.
+      - JWT_SECRET
       - OTEL_ENABLED=${OTEL_ENABLED:-true}
       - OTEL_JAEGER_URL=${OTEL_JAEGER_URL}
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-connex}

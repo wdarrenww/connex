@@ -2,6 +2,8 @@ package user
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"time"
 )
 
@@ -16,11 +18,25 @@ type User struct {
 
 // Validate basic user fields for create/update
 func (u *User) Validate() error {
-	if u.Name == "" {
+	if strings.TrimSpace(u.Name) == "" {
 		return fmt.Errorf("name is required")
 	}
-	if u.Email == "" {
-		return fmt.Errorf("email is required")
+	if len(u.Name) > 100 {
+		return fmt.Errorf("name too long")
+	}
+	if !isValidEmail(u.Email) {
+		return fmt.Errorf("invalid email format")
+	}
+	if len(u.Email) > 255 {
+		return fmt.Errorf("email too long")
+	}
+	if strings.ContainsAny(u.Name, "<>\"'&") {
+		return fmt.Errorf("name contains invalid characters")
 	}
 	return nil
+}
+
+func isValidEmail(email string) bool {
+	re := regexp.MustCompile(`^[a-zA-Z0-9._%%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	return re.MatchString(email)
 }

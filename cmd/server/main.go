@@ -17,6 +17,8 @@ import (
 	"connex/pkg/logger"
 	"connex/pkg/telemetry"
 
+	"encoding/base64"
+
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -112,6 +114,11 @@ func main() {
 		r.Use(custommiddleware.TracingMiddleware())
 	}
 
+	// Apply request size limit to all API routes
+	r.Route("/api", func(api chi.Router) {
+		api.Use(custommiddleware.RequestSizeLimitMiddleware(1 << 20)) // 1MB
+	})
+
 	// Monitoring endpoints (protected in production)
 	r.Route("/metrics", func(r chi.Router) {
 		r.Use(custommiddleware.SecureMetricsMiddleware())
@@ -121,18 +128,30 @@ func main() {
 	r.Get("/health/detailed", healthHandler.HealthCheck)
 	r.Get("/ready", healthHandler.ReadinessCheck)
 
-	// Auth endpoints (with rate limiting)
+	// Auth endpoints (with rate limiting and CSRF)
 	r.Route("/api/auth", func(r chi.Router) {
 		r.Use(custommiddleware.AuthRateLimit())
+		csrfKeyB64 := os.Getenv("CSRF_AUTH_KEY")
+		if csrfKeyB64 == "" {
+			log.Error("CSRF_AUTH_KEY must be set and base64-encoded")
+			os.Exit(1)
+		}
+		csrfKey, err := base64.StdEncoding.DecodeString(csrfKeyB64)
+		if err != nil || len(csrfKey) < 32 {
+			log.Error("CSRF_AUTH_KEY must be a base64-encoded 32-byte key")
+			os.Exit(1)
+		}
+		r.Use(custommiddleware.CSRFMiddleware(csrfKey))
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
 	})
 
-	// User CRUD endpoints (protected, with rate limiting and caching)
+	// User CRUD endpoints (protected, with rate limiting, caching, and CSRF)
 	r.Route("/api/users", func(r chi.Router) {
 		r.Use(auth.AuthMiddleware(cfg.JWT.Secret))
-		r.Use(custommiddleware.IPRateLimit(100, time.Minute)) // 100 requests per minute per IP
-		r.Use(custommiddleware.URLPathCache(5 * time.Minute)) // Cache for 5 minutes
+		r.Use(custommiddleware.IPRateLimit(100, time.Minute))
+		r.Use(custommiddleware.URLPathCache(5 * time.Minute))
+		r.Use(custommiddleware.CSRFMiddleware(csrfKey))
 		userHandler.RegisterRoutes(r)
 	})
 

@@ -4,8 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"connex/internal/api/middleware"
+	"connex/pkg/logger"
+
+	"go.uber.org/zap"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -44,6 +48,13 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		middleware.WriteError(w, http.StatusInternalServerError, "could not create user")
 		return
 	}
+	logger.GetGlobal().Info("user created",
+		zap.Int64("user_id", created.ID),
+		zap.String("email", created.Email),
+		zap.String("ip", r.RemoteAddr),
+		zap.String("action", "create_user"),
+		zap.Time("timestamp", time.Now().UTC()),
+	)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(created)
@@ -100,6 +111,13 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		middleware.WriteError(w, http.StatusInternalServerError, "could not update user")
 		return
 	}
+	logger.GetGlobal().Info("user updated",
+		zap.Int64("user_id", updated.ID),
+		zap.String("email", updated.Email),
+		zap.String("ip", r.RemoteAddr),
+		zap.String("action", "update_user"),
+		zap.Time("timestamp", time.Now().UTC()),
+	)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(updated)
 }
@@ -115,5 +133,11 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		middleware.WriteError(w, http.StatusInternalServerError, "could not delete user")
 		return
 	}
+	logger.GetGlobal().Info("user deleted",
+		zap.Int64("user_id", id),
+		zap.String("ip", r.RemoteAddr),
+		zap.String("action", "delete_user"),
+		zap.Time("timestamp", time.Now().UTC()),
+	)
 	w.WriteHeader(http.StatusNoContent)
 }

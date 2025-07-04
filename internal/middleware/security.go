@@ -3,6 +3,8 @@ package middleware
 import (
 	"net/http"
 	"os"
+
+	"github.com/gorilla/csrf"
 )
 
 // SecureMetricsMiddleware protects the metrics endpoint in production
@@ -62,6 +64,33 @@ func NoCacheMiddleware() func(http.Handler) http.Handler {
 			w.Header().Set("Pragma", "no-cache")
 			w.Header().Set("Expires", "0")
 
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// CSRFMiddleware adds CSRF protection to state-changing requests
+func CSRFMiddleware(authKey []byte) func(http.Handler) http.Handler {
+	csrfMiddleware := csrf.Protect(authKey,
+		csrf.Secure(os.Getenv("ENV") == "production"),
+		csrf.Path("/"),
+	)
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodDelete || r.Method == http.MethodPatch {
+				csrfMiddleware(next).ServeHTTP(w, r)
+			} else {
+				next.ServeHTTP(w, r)
+			}
+		})
+	}
+}
+
+// RequestSizeLimitMiddleware limits the size of request bodies
+func RequestSizeLimitMiddleware(maxBytes int64) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r.Body = http.MaxBytesReader(w, r.Body, maxBytes)
 			next.ServeHTTP(w, r)
 		})
 	}

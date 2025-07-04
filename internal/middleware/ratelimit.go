@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"connex/internal/cache"
+	"net"
 )
 
 type RateLimitConfig struct {
@@ -73,21 +74,40 @@ func RateLimit(config RateLimitConfig) func(http.Handler) http.Handler {
 	}
 }
 
+// getRealIP returns the real client IP, validating format and only trusting headers if behind a proxy
+func getRealIP(r *http.Request) string {
+	// TODO: Optionally, check if behind trusted proxy
+	if ip := validateIP(r.Header.Get("X-Real-IP")); ip != "" {
+		return ip
+	}
+	if ip := validateIP(r.Header.Get("X-Forwarded-For")); ip != "" {
+		return ip
+	}
+	return validateIP(r.RemoteAddr)
+}
+
+// validateIP checks if a string is a valid IP address
+func validateIP(ip string) string {
+	if ip == "" {
+		return ""
+	}
+	parsed, _, err := net.SplitHostPort(ip)
+	if err == nil {
+		ip = parsed
+	}
+	if net.ParseIP(ip) == nil {
+		return ""
+	}
+	return ip
+}
+
 // IPRateLimit creates rate limiting based on client IP
 func IPRateLimit(requests int, window time.Duration) func(http.Handler) http.Handler {
 	return RateLimit(RateLimitConfig{
 		Requests: requests,
 		Window:   window,
 		KeyFunc: func(r *http.Request) string {
-			// Get real IP considering proxies
-			ip := r.Header.Get("X-Real-IP")
-			if ip == "" {
-				ip = r.Header.Get("X-Forwarded-For")
-			}
-			if ip == "" {
-				ip = r.RemoteAddr
-			}
-			return ip
+			return getRealIP(r)
 		},
 	})
 }
@@ -98,14 +118,7 @@ func AuthRateLimit() func(http.Handler) http.Handler {
 		Requests: 5,                // 5 attempts
 		Window:   15 * time.Minute, // 15 minutes
 		KeyFunc: func(r *http.Request) string {
-			ip := r.Header.Get("X-Real-IP")
-			if ip == "" {
-				ip = r.Header.Get("X-Forwarded-For")
-			}
-			if ip == "" {
-				ip = r.RemoteAddr
-			}
-			return fmt.Sprintf("auth:%s", ip)
+			return "auth:" + getRealIP(r)
 		},
 	})
 }
