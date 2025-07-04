@@ -1,0 +1,6 @@
+🔒 Starting Manual Security Testing
+===================================
+Starting comprehensive security testing...
+[0;32m[INFO][0m Checking if application is running...
+[0;31m[ERROR][0m Application is not running at http://localhost:8080
+[0;32m[INFO][0m Please start the application first: make dev-docker

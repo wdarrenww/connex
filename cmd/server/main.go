@@ -110,6 +110,7 @@ func main() {
 	// Add monitoring middleware
 	r.Use(custommiddleware.MetricsMiddleware())
 	r.Use(custommiddleware.SecurityHeadersMiddleware())
+	r.Use(custommiddleware.SecurityMonitoringMiddleware())
 	if cfg.OTel.Enabled {
 		r.Use(custommiddleware.TracingMiddleware())
 	}
@@ -128,19 +129,21 @@ func main() {
 	r.Get("/health/detailed", healthHandler.HealthCheck)
 	r.Get("/ready", healthHandler.ReadinessCheck)
 
+	// Get CSRF key
+	csrfKeyB64 := os.Getenv("CSRF_AUTH_KEY")
+	if csrfKeyB64 == "" {
+		log.Error("CSRF_AUTH_KEY must be set and base64-encoded")
+		os.Exit(1)
+	}
+	csrfKey, err := base64.StdEncoding.DecodeString(csrfKeyB64)
+	if err != nil || len(csrfKey) < 32 {
+		log.Error("CSRF_AUTH_KEY must be a base64-encoded 32-byte key")
+		os.Exit(1)
+	}
+
 	// Auth endpoints (with rate limiting and CSRF)
 	r.Route("/api/auth", func(r chi.Router) {
 		r.Use(custommiddleware.AuthRateLimit())
-		csrfKeyB64 := os.Getenv("CSRF_AUTH_KEY")
-		if csrfKeyB64 == "" {
-			log.Error("CSRF_AUTH_KEY must be set and base64-encoded")
-			os.Exit(1)
-		}
-		csrfKey, err := base64.StdEncoding.DecodeString(csrfKeyB64)
-		if err != nil || len(csrfKey) < 32 {
-			log.Error("CSRF_AUTH_KEY must be a base64-encoded 32-byte key")
-			os.Exit(1)
-		}
 		r.Use(custommiddleware.CSRFMiddleware(csrfKey))
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)

@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.21-alpine AS builder
+FROM golang:1.24.3-alpine3.18 AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates tzdata
@@ -20,7 +20,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o connex ./cmd/server
 
 # Production stage
-FROM alpine:latest
+FROM alpine:3.18
 
 # Install runtime dependencies
 RUN apk --no-cache add ca-certificates tzdata
@@ -41,6 +41,14 @@ COPY --from=builder /app/scripts ./scripts
 
 # Change ownership to non-root user
 RUN chown -R connex:connex /app
+
+# Add security labels
+LABEL maintainer="security@connex.com"
+LABEL security.scanner.enabled="true"
+LABEL security.scanner.vulnerability-reporting="true"
+LABEL security.allow-privilege-escalation="false"
+LABEL security.read-only-root-filesystem="true"
+LABEL security.no-new-privileges="true"
 
 # Switch to non-root user
 USER connex

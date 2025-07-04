@@ -1,4 +1,4 @@
-.PHONY: help build test test-coverage test-integration clean lint fmt docker-build docker-run docker-stop docker-clean load-test load-test-smoke load-test-quick load-test-stress dev-docker prod-sim load-test-prod
+.PHONY: help build test test-coverage test-integration clean lint fmt docker-build docker-run docker-stop docker-clean load-test load-test-smoke load-test-quick load-test-stress dev-docker prod-sim load-test-prod security-scan security-gosec security-nancy security-all
 
 # Default target
 help:
@@ -21,6 +21,10 @@ help:
 	@echo "  dev-docker     - Start development environment with Docker"
 	@echo "  prod-sim       - Start production simulation"
 	@echo "  load-test-prod - Run load tests against production simulation"
+	@echo "  security-scan  - Run comprehensive security scan"
+	@echo "  security-gosec - Run gosec security analysis"
+	@echo "  security-nancy - Run nancy dependency scan"
+	@echo "  security-all   - Run all security scans"
 
 # Build the application
 build:
@@ -168,3 +172,35 @@ load-test-prod: prod-sim
 	sleep 30
 	@echo "Running load tests against production simulation..."
 	./scripts/run-load-tests.sh 
+
+# Security targets
+security-scan:
+	@echo "🔒 Running comprehensive security scan..."
+	@./scripts/security-scan.sh
+
+security-gosec:
+	@echo "🔒 Running gosec security analysis..."
+	@gosec ./... -fmt=json -out=gosec-report.json
+	@echo "Gosec scan completed. Check gosec-report.json for details."
+
+security-nancy:
+	@echo "🔒 Running nancy dependency scan..."
+	@nancy sleuth
+
+security-all: security-gosec security-nancy
+	@echo "🔒 All security scans completed."
+
+security-test: ## Run security testing against running application
+	@echo "🧪 Running security testing..."
+	@./scripts/test-security.sh
+
+security-test-unit: ## Run unit security tests
+	@echo "🧪 Running unit security tests..."
+	@go test -v ./tests/security/...
+
+security-test-all: security-test-unit security-test ## Run all security tests
+	@echo "✅ All security tests completed"
+
+security-test-comprehensive: ## Run comprehensive security testing suite
+	@echo "🔒 Running comprehensive security testing suite..."
+	@./scripts/run-security-tests.sh 

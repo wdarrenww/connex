@@ -104,6 +104,14 @@ var (
 			Help: "Total number of active users",
 		},
 	)
+
+	securityEventsTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "security_events_total",
+			Help: "Total number of security events",
+		},
+		[]string{"event_type", "source"},
+	)
 )
 
 // Init initializes OpenTelemetry tracing and metrics
@@ -220,4 +228,17 @@ func LogWithTrace(ctx context.Context, level string, msg string, fields ...zap.F
 	default:
 		logger.Info(msg, fields...)
 	}
+}
+
+// RecordSecurityEvent records a security event
+func RecordSecurityEvent(eventType string, source string) {
+	// Record in metrics
+	securityEventsTotal.WithLabelValues(eventType, source).Inc()
+
+	// Log the event
+	logger.Info("security event recorded",
+		zap.String("event_type", eventType),
+		zap.String("source", source),
+		zap.Time("timestamp", time.Now().UTC()),
+	)
 }

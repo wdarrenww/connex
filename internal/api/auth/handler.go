@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -50,6 +51,14 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 	if strings.TrimSpace(req.Name) == "" || strings.TrimSpace(req.Email) == "" {
 		middleware.WriteError(w, http.StatusBadRequest, "invalid input")
+		return
+	}
+	if err := validateEmail(req.Email); err != nil {
+		middleware.WriteError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := validateName(req.Name); err != nil {
+		middleware.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	if err := validatePassword(req.Password); err != nil {
@@ -165,4 +174,33 @@ func isCommonPassword(password string) bool {
 		}
 	}
 	return false
+}
+
+// validateEmail checks for a valid email format (basic RFC 5322)
+func validateEmail(email string) error {
+	if len(email) > 254 {
+		return fmt.Errorf("email too long")
+	}
+	// Basic RFC 5322 regex
+	var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9.!#$%&'*+/=?^_` + "`" + `{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$`)
+	if !emailRegex.MatchString(email) {
+		return fmt.Errorf("invalid email format")
+	}
+	return nil
+}
+
+// validateName checks for a safe, reasonable name (no scripts, no dangerous chars, reasonable length)
+func validateName(name string) error {
+	if len(name) < 2 || len(name) > 100 {
+		return fmt.Errorf("name must be between 2 and 100 characters")
+	}
+	// Disallow script tags and dangerous characters
+	if strings.Contains(strings.ToLower(name), "<script") {
+		return fmt.Errorf("name contains forbidden content")
+	}
+	var dangerous = regexp.MustCompile(`[<>"'\\/;]`)
+	if dangerous.MatchString(name) {
+		return fmt.Errorf("name contains forbidden characters")
+	}
+	return nil
 }

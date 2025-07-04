@@ -1,0 +1,4 @@
+# connex/tests/integration.test
+link: duplicated definition of symbol dlopen, from github.com/ebitengine/purego and github.com/ebitengine/purego
+FAIL	connex/tests/integration [build failed]
+FAIL
