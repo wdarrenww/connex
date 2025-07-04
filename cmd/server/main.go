@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"connex/internal/api/auth"
 	"connex/internal/api/health"
 	"connex/internal/api/user"
+	"connex/internal/api/websocket"
 	"connex/internal/cache"
 	"connex/internal/config"
 	"connex/internal/db"
@@ -22,6 +25,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+
 	"github.com/hibiken/asynq"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -176,11 +180,31 @@ func main() {
 		})
 	})
 
-	// Basic health check endpoint
-	r.Get("/api/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"ok"}`))
+	// --- WebSocket Handler ---
+	wsHandler := websocket.NewHandler(cfg.JWT.Secret, redisClient)
+	r.HandleFunc("/ws", wsHandler.HandleWebSocket)
+
+	// --- Static File Handler ---
+	staticDir := filepath.Join("web", "public")
+	fs := http.FileServer(http.Dir(staticDir))
+	// Serve static files under /static/*
+	r.Handle("/static/*", http.StripPrefix("/static/", fs))
+
+	// --- SPA Fallback Handler ---
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api/") || strings.HasPrefix(r.URL.Path, "/ws") {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Not found"))
+			return
+		}
+		indexPath := filepath.Join(staticDir, "index.html")
+		if _, err := os.Stat(indexPath); err == nil {
+			w.Header().Set("Content-Type", "text/html")
+			http.ServeFile(w, r, indexPath)
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Not found"))
 	})
 
 	addr := fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port)

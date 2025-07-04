@@ -1,183 +1,417 @@
 # Connex
 
-This project is a full-stack web application built with a Go-based backend and a JavaScript frontend (React). It includes a RESTful API, authentication, PostgreSQL integration, background jobs, and frontend integration via static file serving or reverse proxy.
+A comprehensive full-stack web application built with Go backend and modern frontend technologies. Features include real-time WebSocket communication, secure authentication, static file serving, and server-side rendering capabilities.
 
-## Features
+## 🚀 Features
 
 ### Backend (Go)
-- HTTP API using `net/http` and `chi` router
-- JSON-based REST endpoints
-- JWT-based authentication with role support
-- PostgreSQL integration using `sqlx` or `gorm`
-- Configurable via `.env` files
-- Graceful shutdown support
-- Middleware: logging, recovery, CORS, request ID
-- Background job runner (e.g., for sending emails)
-- Structured logging with zap
-- Health check and readiness endpoints
-- Optional WebSocket support
+- **HTTP API** using `net/http` and `chi` router
+- **JSON-based REST endpoints** with comprehensive error handling
+- **JWT-based authentication** with role support and CSRF protection
+- **PostgreSQL integration** using `sqlx` with migrations
+- **Redis caching** and session management
+- **WebSocket support** with authentication, rate limiting, and room-based messaging
+- **Static file serving** with SPA fallback for React Router
+- **Server-side rendering hooks** for future SSR implementation
+- **Background job processing** with asynq
+- **Comprehensive monitoring** with Prometheus, OpenTelemetry, and health checks
+- **Security-first approach** with rate limiting, input validation, and security headers
 
-### Frontend (React or similar)
-- SPA (Single Page Application)
-- Built assets can be served via Go backend or hosted separately
-- Authentication-aware routes
-- Axios-based API integration
-- Responsive layout
+### Frontend
+- **Modern responsive UI** with CSS Grid and Flexbox
+- **Real-time chat** via WebSocket connections
+- **Authentication system** with JWT token management
+- **SPA architecture** with client-side routing support
+- **Static file serving** from Go backend
+- **SSR-ready templates** for future server-side rendering
 
-## Project Structure
+### Infrastructure
+- **Docker containerization** with multi-stage builds
+- **Docker Compose** for development and production
+- **Load testing** with k6 and comprehensive test suites
+- **Security scanning** with automated vulnerability detection
+- **CI/CD ready** with comprehensive testing and deployment scripts
+
+## 🏗️ Project Structure
 
 ```
 connex/
-├── cmd/                # Entry point
+├── cmd/                    # Application entry points
 │   └── server/
-│       └── main.go
-├── internal/           # Application logic
-│   ├── api/            # HTTP handlers
-│   ├── service/        # Business logic
-│   ├── db/             # Data access & migrations
-│   ├── middleware/     # HTTP middleware
-│   ├── job/            # Background tasks
-│   └── config/         # App configuration
-├── pkg/                # Utility libraries (JWT, logger, etc.)
-├── web/                # Frontend application
-├── tests/              # Integration and e2e tests
-├── Dockerfile
-├── docker-compose.yml
-├── Makefile
-├── .env
-└── go.mod
+│       └── main.go        # Main server with WebSocket and static file support
+├── internal/              # Application logic
+│   ├── api/              # HTTP handlers and WebSocket
+│   │   ├── auth/         # Authentication handlers
+│   │   ├── user/         # User management
+│   │   ├── websocket/    # WebSocket handler with rooms and messaging
+│   │   └── ssr/          # Server-side rendering hooks
+│   ├── service/          # Business logic
+│   ├── db/               # Database access & migrations
+│   ├── middleware/       # HTTP middleware (security, logging, etc.)
+│   ├── job/              # Background tasks
+│   └── config/           # Configuration management
+├── pkg/                  # Shared libraries
+│   ├── hash/             # Password hashing
+│   ├── jwt/              # JWT utilities
+│   └── logger/           # Structured logging
+├── web/                  # Frontend application
+│   ├── public/           # Static assets (served by Go)
+│   │   └── index.html    # Main SPA with WebSocket chat
+│   └── src/              # Frontend source code
+├── tests/                # Comprehensive test suites
+├── scripts/              # Build and deployment scripts
+├── Dockerfile            # Multi-stage container build
+├── docker-compose.yml    # Development environment
+├── docker-compose.prod.yml # Production environment
+├── Makefile              # Build automation
+└── README.md             # This file
 ```
 
-## Requirements
+## 🛠️ Requirements
 
-- Go >= 1.21
-- Node.js >= 18 (for frontend)
-- PostgreSQL >= 14
-- Docker (optional for local setup)
+- **Go** >= 1.24.3
+- **PostgreSQL** >= 14
+- **Redis** >= 6
+- **Docker** (optional, for containerized setup)
+- **Node.js** >= 18 (for frontend development)
 
-## Setup Instructions
+## 🚀 Quick Start
 
-### 1. Clone the Repository
+### 1. Clone and Setup
 
+```bash
+git clone https://github.com/wdarrenww/connex.git
+cd connex
 ```
-git clone https://github.com/yourusername/your-app.git
-cd your-app
+
+### 2. Environment Configuration
+
+Create a `.env` file based on `env.example`:
+
+```bash
+cp env.example .env
 ```
 
-### 2. Backend Setup
+Configure your environment variables:
 
-#### Environment Configuration
-
-Create a `.env` file in the root:
-
-```
+```env
+# Server
 PORT=8080
 ENV=development
-DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
-JWT_SECRET=supersecurekey
+
+# Database
+DATABASE_URL=postgres://user:password@localhost:5432/connex?sslmode=disable
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
+
+# JWT
+JWT_SECRET=your-super-secret-jwt-key-32-chars-minimum
+
+# CSRF (base64-encoded 32-byte key)
+CSRF_AUTH_KEY=your-base64-encoded-32-byte-csrf-key
+
+# OpenTelemetry
+OTEL_ENABLED=true
+OTEL_ENDPOINT=http://localhost:14268/api/traces
 ```
 
-#### Install Dependencies
+### 3. Install Dependencies
 
-```
+```bash
+# Backend dependencies
 go mod tidy
-```
 
-#### Run the Server
-
-```
-go run ./cmd/server
-```
-
-### 3. Database
-
-Run migrations:
-
-```
-make migrate-up
-```
-
-To rollback:
-
-```
-make migrate-down
-```
-
-Or use a migration tool like `golang-migrate`.
-
-### 4. Frontend Setup
-
-```
+# Frontend dependencies (if developing frontend)
 cd web
 npm install
-npm run dev
 ```
 
-To build for production:
+### 4. Start Services
 
+#### Option A: Docker Compose (Recommended)
+
+```bash
+# Start all services (PostgreSQL, Redis, Jaeger, Prometheus, Grafana)
+make dev-docker
+
+# In another terminal, start the Go application
+make run
 ```
+
+#### Option B: Manual Setup
+
+```bash
+# Start PostgreSQL and Redis manually
+# Then run the application
+make run
+```
+
+### 5. Access the Application
+
+- **Web Application**: http://localhost:8080
+- **API Documentation**: http://localhost:8080/api/health
+- **Metrics**: http://localhost:8080/metrics
+- **Grafana**: http://localhost:3000 (admin/admin)
+- **Jaeger**: http://localhost:16686
+
+## 🔌 WebSocket API
+
+The application includes a comprehensive WebSocket implementation at `/ws`:
+
+### Connection
+
+```javascript
+// Connect with JWT authentication
+const ws = new WebSocket(`ws://localhost:8080/ws?token=${jwtToken}`);
+```
+
+### Message Types
+
+```javascript
+// Chat message
+{
+  "type": "chat",
+  "data": "Hello, world!",
+  "timestamp": "2025-07-03T21:58:45.123Z"
+}
+
+// Join room
+{
+  "type": "auth",
+  "data": {
+    "room": "general"
+  }
+}
+
+// Ping/Pong (automatic)
+{
+  "type": "ping",
+  "data": {},
+  "timestamp": "2025-07-03T21:58:45.123Z"
+}
+```
+
+### Features
+
+- **Authentication**: JWT token validation
+- **Rate Limiting**: 10 connections per minute per IP
+- **Room Support**: Join/leave chat rooms
+- **Message Broadcasting**: Send to all clients or specific rooms
+- **Automatic Ping/Pong**: Connection health monitoring
+- **Error Handling**: Comprehensive error responses
+
+## 📁 Static File Serving
+
+The application serves static files from `web/public/`:
+
+- **Static Assets**: `/static/*` - CSS, JS, images, etc.
+- **SPA Fallback**: Any unknown route serves `index.html` for React Router
+- **Security**: Proper cache headers and security middleware
+
+### Frontend Build
+
+```bash
+# Build frontend (if using a build tool)
+cd web
 npm run build
+
+# Copy build output to public directory
+cp -r dist/* public/
 ```
 
-To serve via Go backend, copy `dist/` into a folder served by your Go static file handler.
+## 🔐 Security Features
 
-### 5. Run All Services with Docker Compose
+### Authentication & Authorization
+- JWT-based authentication with secure token handling
+- Password hashing with bcrypt
+- CSRF protection on state-changing requests
+- Role-based access control
 
+### Input Validation & Sanitization
+- Comprehensive input validation for all endpoints
+- XSS protection with content filtering
+- SQL injection prevention
+- Request size limiting (1MB default)
+
+### Security Headers
+- Content Security Policy (CSP)
+- X-Content-Type-Options
+- X-Frame-Options
+- X-XSS-Protection
+- Modern security headers (COEP, COOP, etc.)
+
+### Rate Limiting
+- IP-based rate limiting for authentication endpoints
+- WebSocket connection rate limiting
+- Configurable limits and time windows
+
+## 🧪 Testing
+
+### Run All Tests
+
+```bash
+# Unit tests
+make test
+
+# Integration tests
+make test-integration
+
+# Security tests
+make security-test-comprehensive
+
+# Load tests
+make load-test
 ```
+
+### Test Coverage
+
+```bash
+make test-coverage
+```
+
+## 📊 Monitoring & Observability
+
+### Metrics
+- Prometheus metrics at `/metrics`
+- Custom application metrics
+- Database and Redis monitoring
+
+### Tracing
+- OpenTelemetry integration
+- Jaeger for distributed tracing
+- Request tracing middleware
+
+### Health Checks
+- `/health` - Basic health check
+- `/health/detailed` - Comprehensive health status
+- `/ready` - Readiness probe
+
+## 🐳 Docker Deployment
+
+### Development
+
+```bash
 docker-compose up --build
 ```
 
-## Development Tools
+### Production
 
-- **Go HTTP Router**: [chi](https://github.com/go-chi/chi)
-- **PostgreSQL ORM**: `sqlx` or `gorm`
-- **JWT Auth**: `github.com/golang-jwt/jwt`
-- **Frontend**: React + Vite
-- **Logging**: `uber-go/zap`
-- **Testing**: `testing`, `httptest`, `testcontainers-go`
-- **Background Jobs**: `asynq` (optional)
-- **Task Automation**: `Makefile`
-
-## API Endpoints (Examples)
-
-- `POST /api/auth/login`
-- `POST /api/auth/register`
-- `GET /api/users/me`
-- `GET /api/health`
-- `POST /api/tasks/send-email`
-
-## Testing
-
-Run unit tests:
-
-```
-go test ./...
+```bash
+docker-compose -f docker-compose.prod.yml up --build
 ```
 
-Run integration tests:
+### Production Features
+- Multi-stage builds for smaller images
+- Security hardening
+- Resource limits
+- Health checks
+- Graceful shutdown
 
+## 🔧 Development
+
+### Code Quality
+
+```bash
+# Format code
+make fmt
+
+# Lint code
+make lint
+
+# Run security scans
+make security-all
 ```
-go test -tags=integration ./tests
+
+### Database Migrations
+
+```bash
+# Run migrations
+make migrate-up
+
+# Rollback migrations
+make migrate-down
 ```
 
-## Deployment
+### Background Jobs
 
-### Build the Go binary
+```bash
+# Start job worker
+go run ./cmd/worker
 
-```
-make build
-```
-
-### Build Docker image
-
-```
-docker build -t your-app .
+# Enqueue jobs via API
+curl -X POST http://localhost:8080/api/jobs/email
 ```
 
-### Deploy to Fly.io / Railway / GCP / AWS
+## 🚀 Production Deployment
 
-Recommended: build frontend separately and serve via CDN; deploy backend as container.
+### Environment Variables
 
-## License
+Ensure all production environment variables are set:
 
-This project is licensed under the MIT License.
+```bash
+# Required for production
+ENV=production
+JWT_SECRET=<secure-32-char-minimum>
+CSRF_AUTH_KEY=<base64-encoded-32-byte-key>
+DATABASE_URL=<production-database-url>
+REDIS_PASSWORD=<redis-password>
+```
+
+### Security Checklist
+
+- [ ] Change default passwords
+- [ ] Configure HTTPS/TLS
+- [ ] Set up proper CORS origins
+- [ ] Configure rate limiting for production
+- [ ] Set up monitoring and alerting
+- [ ] Regular security scans
+- [ ] Database backups
+- [ ] Log aggregation
+
+## 📚 API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+
+### Users
+- `GET /api/users/me` - Get current user
+- `PUT /api/users/me` - Update current user
+- `DELETE /api/users/me` - Delete current user
+
+### Health & Monitoring
+- `GET /health` - Basic health check
+- `GET /health/detailed` - Detailed health status
+- `GET /ready` - Readiness probe
+- `GET /metrics` - Prometheus metrics
+
+### WebSocket
+- `GET /ws` - WebSocket endpoint
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Run the test suite
+6. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+For support and questions:
+- Create an issue on GitHub
+- Check the documentation
+- Review the security audit report
+
+---
+
+**Built with ❤️ using Go, WebSockets, and modern web technologies**
