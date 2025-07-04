@@ -7,14 +7,19 @@ import (
 	"time"
 
 	"connex/internal/api/auth"
+	"connex/internal/api/health"
 	"connex/internal/api/user"
+	"connex/internal/cache"
 	"connex/internal/config"
 	"connex/internal/db"
+	"connex/internal/job"
+	custommiddleware "connex/internal/middleware"
 	"connex/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/hibiken/asynq"
 )
 
 func main() {
@@ -42,6 +47,27 @@ func main() {
 	}
 	defer dbInstance.Close()
 
+	// Initialize Redis
+	redisClient, err := cache.Init(cfg.Redis)
+	if err != nil {
+		log.Error("Failed to connect to Redis")
+		log.Error(err.Error())
+		os.Exit(1)
+	}
+	defer redisClient.Close()
+
+	// Initialize background jobs
+	redisOpt := asynq.RedisClientOpt{
+		Addr:     fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port),
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+	}
+	if err := job.Init(cfg.Jobs, redisOpt, log.Logger); err != nil {
+		log.Error("Failed to initialize job queue")
+		log.Error(err.Error())
+		os.Exit(1)
+	}
+
 	// User service and handler
 	userService := user.NewService()
 	userHandler := user.NewHandler(userService)
@@ -49,15 +75,18 @@ func main() {
 	// Auth handler
 	authHandler := auth.NewHandler(userService, cfg.JWT.Secret)
 
+	// Health handler
+	healthHandler := health.NewHandler()
+
 	// Set up router
 	r := chi.NewRouter()
 
 	// Middleware
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
+	r.Use(chimiddleware.RequestID)
+	r.Use(chimiddleware.RealIP)
+	r.Use(chimiddleware.Logger)
+	r.Use(chimiddleware.Recoverer)
+	r.Use(chimiddleware.Timeout(60 * time.Second))
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://your-frontend-domain.com", "http://localhost:3000"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -67,16 +96,42 @@ func main() {
 		MaxAge:           300,
 	}))
 
-	// Auth endpoints
+	// Health check endpoints
+	r.Get("/health", healthHandler.SimpleHealthCheck)
+	r.Get("/health/detailed", healthHandler.HealthCheck)
+	r.Get("/ready", healthHandler.ReadinessCheck)
+
+	// Auth endpoints (with rate limiting)
 	r.Route("/api/auth", func(r chi.Router) {
+		r.Use(custommiddleware.AuthRateLimit())
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
 	})
 
-	// User CRUD endpoints (protected)
+	// User CRUD endpoints (protected, with rate limiting and caching)
 	r.Route("/api/users", func(r chi.Router) {
 		r.Use(auth.AuthMiddleware(cfg.JWT.Secret))
+		r.Use(custommiddleware.IPRateLimit(100, time.Minute)) // 100 requests per minute per IP
+		r.Use(custommiddleware.URLPathCache(5 * time.Minute)) // Cache for 5 minutes
 		userHandler.RegisterRoutes(r)
+	})
+
+	// Job management endpoints (admin only)
+	r.Route("/api/jobs", func(r chi.Router) {
+		r.Use(auth.AuthMiddleware(cfg.JWT.Secret))
+		r.Post("/email", func(w http.ResponseWriter, r *http.Request) {
+			// Example: enqueue email job
+			payload := job.EmailPayload{
+				To:      "user@example.com",
+				Subject: "Test Email",
+				Body:    "This is a test email",
+			}
+			if err := job.EnqueueEmail(payload); err != nil {
+				http.Error(w, "failed to enqueue job", http.StatusInternalServerError)
+				return
+			}
+			w.WriteHeader(http.StatusAccepted)
+		})
 	})
 
 	// Basic health check endpoint

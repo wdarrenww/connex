@@ -15,6 +15,8 @@ type Config struct {
 	Database DatabaseConfig
 	JWT      JWTConfig
 	Log      LogConfig
+	Redis    RedisConfig
+	Jobs     JobsConfig
 }
 
 // ServerConfig holds server-related configuration
@@ -49,6 +51,21 @@ type LogConfig struct {
 	Env   string
 }
 
+// RedisConfig holds Redis-related configuration
+type RedisConfig struct {
+	URL      string
+	Host     string
+	Port     string
+	Password string
+	DB       int
+}
+
+// JobsConfig holds background job configuration
+type JobsConfig struct {
+	Concurrency int
+	Queues      []string
+}
+
 // Load loads configuration from environment variables and .env file
 func Load() (*Config, error) {
 	// Load .env file if it exists
@@ -81,6 +98,17 @@ func Load() (*Config, error) {
 		Log: LogConfig{
 			Level: getEnv("LOG_LEVEL", "info"),
 			Env:   getEnv("ENV", "development"),
+		},
+		Redis: RedisConfig{
+			URL:      getEnv("REDIS_URL", ""),
+			Host:     getEnv("REDIS_HOST", "localhost"),
+			Port:     getEnv("REDIS_PORT", "6379"),
+			Password: getEnv("REDIS_PASSWORD", ""),
+			DB:       getIntEnv("REDIS_DB", 0),
+		},
+		Jobs: JobsConfig{
+			Concurrency: getIntEnv("JOBS_CONCURRENCY", 10),
+			Queues:      []string{"default", "critical", "low"},
 		},
 	}
 
