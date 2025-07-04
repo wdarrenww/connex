@@ -15,11 +15,13 @@ import (
 	"connex/internal/job"
 	custommiddleware "connex/internal/middleware"
 	"connex/pkg/logger"
+	"connex/pkg/telemetry"
 
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/hibiken/asynq"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -46,6 +48,13 @@ func main() {
 		os.Exit(1)
 	}
 	defer dbInstance.Close()
+
+	// Initialize OpenTelemetry
+	if err := telemetry.Init(cfg.OTel, log.Logger); err != nil {
+		log.Error("Failed to initialize OpenTelemetry")
+		log.Error(err.Error())
+		os.Exit(1)
+	}
 
 	// Initialize Redis
 	redisClient, err := cache.Init(cfg.Redis)
@@ -96,7 +105,18 @@ func main() {
 		MaxAge:           300,
 	}))
 
-	// Health check endpoints
+	// Add monitoring middleware
+	r.Use(custommiddleware.MetricsMiddleware())
+	r.Use(custommiddleware.SecurityHeadersMiddleware())
+	if cfg.OTel.Enabled {
+		r.Use(custommiddleware.TracingMiddleware())
+	}
+
+	// Monitoring endpoints (protected in production)
+	r.Route("/metrics", func(r chi.Router) {
+		r.Use(custommiddleware.SecureMetricsMiddleware())
+		r.Handle("/", promhttp.Handler())
+	})
 	r.Get("/health", healthHandler.SimpleHealthCheck)
 	r.Get("/health/detailed", healthHandler.HealthCheck)
 	r.Get("/ready", healthHandler.ReadinessCheck)

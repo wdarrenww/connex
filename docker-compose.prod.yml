@@ -1,0 +1,184 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (Production)
+  postgres:
+    image: postgres:15-alpine
+    container_name: connex-postgres-prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-connex}
+      POSTGRES_USER: ${POSTGRES_USER:-connex}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./internal/db/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-connex} -d ${POSTGRES_DB:-connex}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - connex-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # Redis Cache (Production)
+  redis:
+    image: redis:7-alpine
+    container_name: connex-redis-prod
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - connex-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # Application (Production)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: connex-app-prod
+    environment:
+      - ENV=production
+      - PORT=8080
+      - DATABASE_URL=postgres://${POSTGRES_USER:-connex}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-connex}?sslmode=require
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - JWT_SECRET=${JWT_SECRET}
+      - OTEL_ENABLED=${OTEL_ENABLED:-true}
+      - OTEL_JAEGER_URL=${OTEL_JAEGER_URL}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-connex}
+      - OTEL_ENVIRONMENT=production
+      - METRICS_API_KEY=${METRICS_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - connex-network
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  # Nginx Reverse Proxy (Production)
+  nginx:
+    image: nginx:alpine
+    container_name: connex-nginx-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./scripts/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./scripts/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - connex-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  # Prometheus (Production)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: connex-prometheus-prod
+    volumes:
+      - ./scripts/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    networks:
+      - connex-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # Grafana (Production)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: connex-grafana-prod
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./scripts/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./scripts/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - connex-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  connex-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 

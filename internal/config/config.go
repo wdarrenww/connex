@@ -17,6 +17,7 @@ type Config struct {
 	Log      LogConfig
 	Redis    RedisConfig
 	Jobs     JobsConfig
+	OTel     OTelConfig
 }
 
 // ServerConfig holds server-related configuration
@@ -66,6 +67,14 @@ type JobsConfig struct {
 	Queues      []string
 }
 
+// OTelConfig holds OpenTelemetry configuration
+type OTelConfig struct {
+	Enabled     bool
+	ServiceName string
+	JaegerURL   string
+	Environment string
+}
+
 // Load loads configuration from environment variables and .env file
 func Load() (*Config, error) {
 	// Load .env file if it exists
@@ -109,6 +118,12 @@ func Load() (*Config, error) {
 		Jobs: JobsConfig{
 			Concurrency: getIntEnv("JOBS_CONCURRENCY", 10),
 			Queues:      []string{"default", "critical", "low"},
+		},
+		OTel: OTelConfig{
+			Enabled:     getEnv("OTEL_ENABLED", "false") == "true",
+			ServiceName: getEnv("OTEL_SERVICE_NAME", "connex"),
+			JaegerURL:   getEnv("OTEL_JAEGER_URL", "http://localhost:14268/api/traces"),
+			Environment: getEnv("OTEL_ENVIRONMENT", "development"),
 		},
 	}
 
