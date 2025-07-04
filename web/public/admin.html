@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connex Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-light: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphic Card */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--glass-shadow);
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Layout */
+        .admin-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+            gap: 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            padding: 24px;
+            position: fixed;
+            height: 100vh;
+            width: 280px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            color: var(--text-light);
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-light);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 1;
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            color: var(--text-light);
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .search-bar {
+            position: relative;
+        }
+
+        .search-input {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 16px 12px 44px;
+            color: var(--text-light);
+            width: 300px;
+            backdrop-filter: blur(20px);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stats-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .stats-icon.users { background: linear-gradient(135deg, var(--success), #059669); }
+        .stats-icon.active { background: linear-gradient(135deg, var(--info), #2563eb); }
+        .stats-icon.revenue { background: linear-gradient(135deg, var(--warning), #d97706); }
+        .stats-icon.orders { background: linear-gradient(135deg, var(--danger), #dc2626); }
+
+        .stats-content h3 {
+            color: var(--text-light);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stats-content p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stats-trend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .stats-trend.positive { color: var(--success); }
+        .stats-trend.negative { color: var(--danger); }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .chart-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            color: var(--text-light);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chart-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 6px 12px;
+            color: var(--text-light);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chart-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Tables */
+        .table-section {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-title {
+            color: var(--text-light);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .table th {
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        /* Activity Feed */
+        .activity-feed {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .activity-icon.login { background: var(--success); }
+        .activity-icon.logout { background: var(--danger); }
+        .activity-icon.create { background: var(--info); }
+        .activity-icon.update { background: var(--warning); }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .activity-time {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .admin-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-input {
+                width: 200px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid var(--glass-border);
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: var(--text-light);
+            z-index: 10000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .notification.warning {
+            border-left: 4px solid var(--warning);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">C</div>
+                <div class="logo-text">Connex Admin</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                        <i data-feather="home"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#users" class="nav-link" data-section="users">
+                        <i data-feather="users"></i>
+                        Users
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#analytics" class="nav-link" data-section="analytics">
+                        <i data-feather="bar-chart-2"></i>
+                        Analytics
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#system" class="nav-link" data-section="system">
+                        <i data-feather="settings"></i>
+                        System
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#logs" class="nav-link" data-section="logs">
+                        <i data-feather="file-text"></i>
+                        Logs
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#settings" class="nav-link" data-section="settings">
+                        <i data-feather="shield"></i>
+                        Security
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <h1 class="page-title">Dashboard</h1>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <i data-feather="search" class="search-icon"></i>
+                        <input type="text" class="search-input" placeholder="Search...">
+                    </div>
+                    <div class="user-menu">
+                        <div class="user-avatar">A</div>
+                        <span>Admin User</span>
+                        <i data-feather="chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="dashboard-section">
+                <!-- Stats Cards -->
+                <div class="dashboard-grid">
+                    <div class="stats-card fade-in-up">
+                        <div class="stats-icon users">
+                            <i data-feather="users"></i>
+                        </div>
+                        <div class="stats-content">
+                            <h3 id="total-users">1,247</h3>
+                            <p>Total Users</p>
+                            <div class="stats-trend positive">
+                                <i data-feather="trending-up"></i>
+                                +12.5%
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-card fade-in-up">
+                        <div class="stats-icon active">
+                            <i data-feather="activity"></i>
+                        </div>
+                        <div class="stats-content">
+                            <h3 id="active-users">892</h3>
+                            <p>Active Users</p>
+                            <div class="stats-trend positive">
+                                <i data-feather="trending-up"></i>
+                                +8.3%
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-card fade-in-up">
+                        <div class="stats-icon revenue">
+                            <i data-feather="dollar-sign"></i>
+                        </div>
+                        <div class="stats-content">
+                            <h3 id="total-revenue">$45,231</h3>
+                            <p>Total Revenue</p>
+                            <div class="stats-trend positive">
+                                <i data-feather="trending-up"></i>
+                                +15.2%
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-card fade-in-up">
+                        <div class="stats-icon orders">
+                            <i data-feather="shopping-cart"></i>
+                        </div>
+                        <div class="stats-content">
+                            <h3 id="total-orders">3,456</h3>
+                            <p>Total Orders</p>
+                            <div class="stats-trend negative">
+                                <i data-feather="trending-down"></i>
+                                -2.1%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">User Activity</h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn active" data-period="7d">7D</button>
+                                <button class="chart-btn" data-period="30d">30D</button>
+                                <button class="chart-btn" data-period="90d">90D</button>
+                            </div>
+                        </div>
+                        <canvas id="userActivityChart" width="400" height="200"></canvas>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">System Health</h3>
+                        </div>
+                        <canvas id="systemHealthChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Users Table -->
+                <div class="table-section">
+                    <div class="table-header">
+                        <h3 class="table-title">Recent Users</h3>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary">
+                                <i data-feather="download"></i>
+                                Export
+                            </button>
+                            <button class="btn btn-primary">
+                                <i data-feather="plus"></i>
+                                Add User
+                            </button>
+                        </div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Activity Feed -->
+                <div class="activity-feed">
+                    <h3 class="chart-title">Recent Activity</h3>
+                    <div id="activity-feed">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section (Hidden by default) -->
+            <section id="users" class="section" style="display: none;">
+                <div class="glass-card">
+                    <h2>User Management</h2>
+                    <p>Manage users, roles, and permissions</p>
+                </div>
+            </section>
+
+            <!-- Analytics Section (Hidden by default) -->
+            <section id="analytics" class="section" style="display: none;">
+                <div class="glass-card">
+                    <h2>Analytics</h2>
+                    <p>Advanced analytics and reporting</p>
+                </div>
+            </section>
+
+            <!-- System Section (Hidden by default) -->
+            <section id="system" class="section" style="display: none;">
+                <div class="glass-card">
+                    <h2>System Settings</h2>
+                    <p>Configure system settings and preferences</p>
+                </div>
+            </section>
+
+            <!-- Logs Section (Hidden by default) -->
+            <section id="logs" class="section" style="display: none;">
+                <div class="glass-card">
+                    <h2>System Logs</h2>
+                    <p>View and manage system logs</p>
+                </div>
+            </section>
+
+            <!-- Settings Section (Hidden by default) -->
+            <section id="settings" class="section" style="display: none;">
+                <div class="glass-card">
+                    <h2>Security Settings</h2>
+                    <p>Configure security settings and policies</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <script>
+        // Initialize Feather Icons
+        feather.replace();
+
+        // Global variables
+        let currentSection = 'dashboard';
+        let userActivityChart = null;
+        let systemHealthChart = null;
+        let ws = null;
+
+        // Sample data
+        const sampleUsers = [
+            { id: 1, name: 'John Doe', email: 'john@example.com', status: 'active', lastLogin: '2 hours ago' },
+            { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'active', lastLogin: '1 hour ago' },
+            { id: 3, name: 'Bob Johnson', email: 'bob@example.com', status: 'inactive', lastLogin: '3 days ago' },
+            { id: 4, name: 'Alice Brown', email: 'alice@example.com', status: 'pending', lastLogin: 'Never' },
+            { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', status: 'active', lastLogin: '30 minutes ago' }
+        ];
+
+        const sampleActivity = [
+            { type: 'login', user: 'John Doe', time: '2 minutes ago', icon: 'login' },
+            { type: 'create', user: 'Jane Smith', time: '5 minutes ago', icon: 'create' },
+            { type: 'update', user: 'Bob Johnson', time: '10 minutes ago', icon: 'update' },
+            { type: 'logout', user: 'Alice Brown', time: '15 minutes ago', icon: 'logout' },
+            { type: 'login', user: 'Charlie Wilson', time: '20 minutes ago', icon: 'login' }
+        ];
+
+        // Initialize dashboard
+        function initDashboard() {
+            setupNavigation();
+            setupCharts();
+            populateUsersTable();
+            populateActivityFeed();
+            setupWebSocket();
+            setupSearch();
+            setupNotifications();
+            startRealTimeUpdates();
+        }
+
+        // Navigation
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = link.getAttribute('data-section');
+                    showSection(section);
+                    
+                    // Update active state
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                });
+            });
+        }
+
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section, #dashboard').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            const targetSection = document.getElementById(sectionName);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+                currentSection = sectionName;
+                
+                // Update page title
+                const pageTitle = document.querySelector('.page-title');
+                pageTitle.textContent = sectionName.charAt(0).toUpperCase() + sectionName.slice(1);
+            }
+        }
+
+        // Charts
+        function setupCharts() {
+            setupUserActivityChart();
+            setupSystemHealthChart();
+        }
+
+        function setupUserActivityChart() {
+            const ctx = document.getElementById('userActivityChart').getContext('2d');
+            userActivityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Active Users',
+                        data: [65, 59, 80, 81, 56, 55, 40],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'New Users',
+                        data: [28, 48, 40, 19, 86, 27, 90],
+                        borderColor: '#764ba2',
+                        backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setupSystemHealthChart() {
+            const ctx = document.getElementById('systemHealthChart').getContext('2d');
+            systemHealthChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['CPU', 'Memory', 'Disk', 'Network'],
+                    datasets: [{
+                        data: [65, 45, 30, 80],
+                        backgroundColor: [
+                            '#10b981',
+                            '#3b82f6',
+                            '#f59e0b',
+                            '#ef4444'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#ffffff',
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Tables
+        function populateUsersTable() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+
+            sampleUsers.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                                ${user.name.charAt(0)}
+                            </div>
+                            <span>${user.name}</span>
+                        </div>
+                    </td>
+                    <td>${user.email}</td>
+                    <td><span class="status-badge status-${user.status}">${user.status}</span></td>
+                    <td>${user.lastLogin}</td>
+                    <td>
+                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">
+                            <i data-feather="edit-2" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; margin-left: 8px;">
+                            <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            feather.replace();
+        }
+
+        // Activity Feed
+        function populateActivityFeed() {
+            const container = document.getElementById('activity-feed');
+            container.innerHTML = '';
+
+            sampleActivity.forEach(activity => {
+                const item = document.createElement('div');
+                item.className = 'activity-item';
+                item.innerHTML = `
+                    <div class="activity-icon ${activity.icon}">
+                        <i data-feather="${activity.icon === 'login' ? 'log-in' : activity.icon}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">${activity.user} ${activity.type === 'login' ? 'logged in' : activity.type === 'logout' ? 'logged out' : activity.type === 'create' ? 'created a new account' : 'updated their profile'}</div>
+                        <div class="activity-time">${activity.time}</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+            
+            feather.replace();
+        }
+
+        // WebSocket
+        function setupWebSocket() {
+            // Connect to WebSocket for real-time updates
+            const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                console.log('WebSocket connected for admin dashboard');
+                showNotification('Connected to real-time updates', 'success');
+            };
+
+            ws.onmessage = function(event) {
+                try {
+                    const message = JSON.parse(event.data);
+                    handleWebSocketMessage(message);
+                } catch (error) {
+                    console.error('Failed to parse WebSocket message:', error);
+                }
+            };
+
+            ws.onclose = function() {
+                console.log('WebSocket disconnected');
+                showNotification('Lost connection to real-time updates', 'warning');
+            };
+        }
+
+        function handleWebSocketMessage(message) {
+            switch (message.type) {
+                case 'admin_update':
+                    updateDashboardData(message.data);
+                    break;
+                case 'user_activity':
+                    addActivityItem(message.data);
+                    break;
+                case 'system_alert':
+                    showNotification(message.data.message, message.data.level || 'info');
+                    break;
+            }
+        }
+
+        // Search
+        function setupSearch() {
+            const searchInput = document.querySelector('.search-input');
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                // Implement search functionality
+                console.log('Searching for:', query);
+            });
+        }
+
+        // Notifications
+        function setupNotifications() {
+            // Chart period buttons
+            const chartBtns = document.querySelectorAll('.chart-btn');
+            chartBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    chartBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    updateChartData(btn.getAttribute('data-period'));
+                });
+            });
+
+            // Action buttons
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (btn.textContent.includes('Add User')) {
+                        showNotification('Add user functionality coming soon!', 'info');
+                    } else if (btn.textContent.includes('Export')) {
+                        showNotification('Export functionality coming soon!', 'info');
+                    }
+                });
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i data-feather="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            feather.replace();
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Remove notification
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => container.removeChild(notification), 300);
+            }, 5000);
+        }
+
+        // Real-time updates
+        function startRealTimeUpdates() {
+            // Simulate real-time data updates
+            setInterval(() => {
+                updateStats();
+                updateCharts();
+            }, 30000); // Update every 30 seconds
+        }
+
+        function updateStats() {
+            // Simulate stat updates
+            const stats = {
+                users: Math.floor(Math.random() * 200) + 1200,
+                active: Math.floor(Math.random() * 100) + 800,
+                revenue: Math.floor(Math.random() * 10000) + 40000,
+                orders: Math.floor(Math.random() * 500) + 3000
+            };
+
+            document.getElementById('total-users').textContent = stats.users.toLocaleString();
+            document.getElementById('active-users').textContent = stats.active.toLocaleString();
+            document.getElementById('total-revenue').textContent = '$' + stats.revenue.toLocaleString();
+            document.getElementById('total-orders').textContent = stats.orders.toLocaleString();
+        }
+
+        function updateCharts() {
+            if (userActivityChart) {
+                userActivityChart.data.datasets[0].data = Array.from({length: 7}, () => Math.floor(Math.random() * 100));
+                userActivityChart.data.datasets[1].data = Array.from({length: 7}, () => Math.floor(Math.random() * 100));
+                userActivityChart.update('none');
+            }
+
+            if (systemHealthChart) {
+                systemHealthChart.data.datasets[0].data = [
+                    Math.floor(Math.random() * 100),
+                    Math.floor(Math.random() * 100),
+                    Math.floor(Math.random() * 100),
+                    Math.floor(Math.random() * 100)
+                ];
+                systemHealthChart.update('none');
+            }
+        }
+
+        function updateChartData(period) {
+            // Simulate different data for different periods
+            const data = {
+                '7d': Array.from({length: 7}, () => Math.floor(Math.random() * 100)),
+                '30d': Array.from({length: 30}, () => Math.floor(Math.random() * 100)),
+                '90d': Array.from({length: 90}, () => Math.floor(Math.random() * 100))
+            };
+
+            if (userActivityChart && data[period]) {
+                userActivityChart.data.labels = period === '7d' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] :
+                                              period === '30d' ? Array.from({length: 30}, (_, i) => i + 1) :
+                                              Array.from({length: 90}, (_, i) => i + 1);
+                userActivityChart.data.datasets[0].data = data[period];
+                userActivityChart.update();
+            }
+        }
+
+        function updateDashboardData(data) {
+            // Update dashboard with real-time data
+            if (data.stats) {
+                Object.keys(data.stats).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        element.textContent = data.stats[key];
+                    }
+                });
+            }
+        }
+
+        function addActivityItem(activity) {
+            const container = document.getElementById('activity-feed');
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            item.innerHTML = `
+                <div class="activity-icon ${activity.icon}">
+                    <i data-feather="${activity.icon === 'login' ? 'log-in' : activity.icon}"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">${activity.user} ${activity.action}</div>
+                    <div class="activity-time">Just now</div>
+                </div>
+            `;
+            
+            container.insertBefore(item, container.firstChild);
+            
+            // Remove old items if too many
+            if (container.children.length > 10) {
+                container.removeChild(container.lastChild);
+            }
+            
+            feather.replace();
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (userActivityChart) userActivityChart.resize();
+            if (systemHealthChart) systemHealthChart.resize();
+        });
+    </script>
+</body>
+</html> 

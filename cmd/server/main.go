@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"connex/internal/api/admin"
 	"connex/internal/api/auth"
 	"connex/internal/api/health"
 	"connex/internal/api/user"
@@ -92,6 +93,9 @@ func main() {
 
 	// Health handler
 	healthHandler := health.NewHandler()
+
+	// Admin handler
+	adminHandler := admin.NewHandler(log.Logger)
 
 	// Set up router
 	r := chi.NewRouter()
@@ -180,6 +184,14 @@ func main() {
 		})
 	})
 
+	// Admin API endpoints (protected, with rate limiting and CSRF)
+	r.Route("/api", func(r chi.Router) {
+		r.Use(auth.AuthMiddleware(cfg.JWT.Secret))
+		r.Use(custommiddleware.IPRateLimit(200, time.Minute))
+		r.Use(custommiddleware.CSRFMiddleware(csrfKey))
+		adminHandler.RegisterRoutes(r)
+	})
+
 	// --- WebSocket Handler ---
 	wsHandler := websocket.NewHandler(cfg.JWT.Secret, redisClient)
 	r.HandleFunc("/ws", wsHandler.HandleWebSocket)
@@ -189,6 +201,18 @@ func main() {
 	fs := http.FileServer(http.Dir(staticDir))
 	// Serve static files under /static/*
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
+
+	// Admin dashboard route
+	r.Get("/admin", func(w http.ResponseWriter, r *http.Request) {
+		adminPath := filepath.Join(staticDir, "admin.html")
+		if _, err := os.Stat(adminPath); err == nil {
+			w.Header().Set("Content-Type", "text/html")
+			http.ServeFile(w, r, adminPath)
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Admin dashboard not found"))
+	})
 
 	// --- SPA Fallback Handler ---
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {

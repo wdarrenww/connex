@@ -24,6 +24,7 @@ A comprehensive full-stack web application built with Go backend and modern fron
 - **SPA architecture** with client-side routing support
 - **Static file serving** from Go backend
 - **SSR-ready templates** for future server-side rendering
+- **Admin Dashboard** with glassmorphic design and real-time monitoring
 
 ### Infrastructure
 - **Docker containerization** with multi-stage builds
@@ -56,7 +57,8 @@ connex/
 │   └── logger/           # Structured logging
 ├── web/                  # Frontend application
 │   ├── public/           # Static assets (served by Go)
-│   │   └── index.html    # Main SPA with WebSocket chat
+│   │   ├── index.html    # Main SPA with WebSocket chat
+│   │   └── admin.html    # Admin dashboard with glassmorphic UI
 │   └── src/              # Frontend source code
 ├── tests/                # Comprehensive test suites
 ├── scripts/              # Build and deployment scripts
@@ -153,6 +155,7 @@ make run
 ### 5. Access the Application
 
 - **Web Application**: http://localhost:8080
+- **Admin Dashboard**: http://localhost:8080/admin
 - **API Documentation**: http://localhost:8080/api/health
 - **Metrics**: http://localhost:8080/metrics
 - **Grafana**: http://localhost:3000 (admin/admin)
@@ -382,6 +385,14 @@ REDIS_PASSWORD=<redis-password>
 - `GET /api/users/me` - Get current user
 - `PUT /api/users/me` - Update current user
 - `DELETE /api/users/me` - Delete current user
+
+### Admin (Protected)
+- `GET /api/admin/dashboard` - Dashboard overview data
+- `GET /api/admin/users` - User management data
+- `GET /api/admin/analytics` - Analytics and reporting
+- `GET /api/admin/system` - System status and health
+- `GET /api/admin/logs` - System logs
+- `GET /api/admin/metrics` - System metrics
 
 ### Health & Monitoring
 - `GET /health` - Basic health check
